@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(instantiate)
     for (size_t i = 0; i < n; ++i)
     {
         vector<pair<double, double> > temp;
-        temp.push_back(pair<double, double>(pitch[i], 1.0));
+        temp.emplace_back(pitch[i], 1.0);
         pitchProb.push_back(temp);
     }
 

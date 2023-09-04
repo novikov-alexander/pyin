@@ -324,7 +324,7 @@ LocalCandidatePYIN::process(const float *const *inputBuffers, RealTime timestamp
                 m_inputSampleRate * (1.0 /
                 m_yinUtil->parabolicInterpolation(yinBuffer, iBuf));
             double tempPitch = 12 * std::log(currentF0/440)/std::log(2.) + 69;
-            tempPitchProb.push_back(pair<double, double>(tempPitch, peakProbability[iBuf]));
+            tempPitchProb.emplace_back(tempPitch, peakProbability[iBuf]);
         }
     }
     m_pitchProb.push_back(tempPitchProb);
