@@ -114,7 +114,7 @@ Yin::processProbabilisticYin(const double *in) const {
             double currentF0 = 
                 m_inputSampleRate * (1.0 /
                 m_yinUtil->parabolicInterpolation(yinBuffer, iBuf));
-            yo.freqProb.push_back(pair<double, double>(currentF0, peakProbability[iBuf]));
+            yo.freqProb.emplace_back(currentF0, peakProbability[iBuf]);
         }
     }
     
