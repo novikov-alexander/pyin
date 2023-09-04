@@ -449,13 +449,16 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
 
     FeatureSet fs;
     
-    float rms = 0;
     
     double *dInputBuffers = new double[m_blockSize];
-    for (size_t i = 0; i < m_blockSize; ++i) {
-        dInputBuffers[i] = inputBuffers[0][i];
-        rms += inputBuffers[0][i] * inputBuffers[0][i];
-    }
+    std::copy(inputBuffers[0], &inputBuffers[0][m_blockSize], dInputBuffers);
+
+    double rms = std::accumulate( 
+        dInputBuffers.begin(), 
+        dInputBuffers.end(), 
+        0, 
+        [&](double acc, double val){return acc + val*val; });
+
     rms /= m_blockSize;
     rms = sqrt(rms);
     
@@ -472,12 +475,12 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
         double tempPitch = 12 * std::log(yo.freqProb[iCandidate].first/440)/std::log(2.) + 69;
         if (!isLowAmplitude)
         {
-            tempPitchProb.push_back(pair<double, double>
-                (tempPitch, yo.freqProb[iCandidate].second));
+            tempPitchProb.emplace_back(
+                tempPitch, yo.freqProb[iCandidate].second);
         } else {
             float factor = ((rms+0.01*m_lowAmp)/(1.01*m_lowAmp));
-            tempPitchProb.push_back(pair<double, double>
-                (tempPitch, yo.freqProb[iCandidate].second*factor));
+            tempPitchProb.emplace_back(
+                tempPitch, yo.freqProb[iCandidate].second*factor);
         }
     }
 
@@ -618,7 +621,7 @@ PYinVamp::addNoteFeatures(FeatureSet &fs)
         {
             double tempPitch = 12 * 
                 std::log(m_pitchTrack[iFrame]/440)/std::log(2.) + 69;
-            temp.push_back(std::pair<double,double>(tempPitch, .9));
+            temp.emplace_back(tempPitch, .9);
         }
         smoothedPitch.push_back(temp);
     }
