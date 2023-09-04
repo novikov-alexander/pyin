@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <cmath>
 #include <complex>
+#include <numeric>
 
 using std::string;
 using std::vector;
@@ -454,8 +455,8 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
     std::copy(inputBuffers[0], &inputBuffers[0][m_blockSize], dInputBuffers);
 
     double rms = std::accumulate( 
-        dInputBuffers.begin(), 
-        dInputBuffers.end(), 
+        dInputBuffers, 
+        dInputBuffers + m_blockSize, 
         0, 
         [&](double acc, double val){return acc + val*val; });
 
