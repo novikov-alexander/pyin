@@ -455,8 +455,8 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
     std::copy(inputBuffers[0], &inputBuffers[0][m_blockSize], dInputBuffers);
 
     double rms = std::accumulate( 
-        dInputBuffers, 
-        dInputBuffers + m_blockSize, 
+        inputBuffers[0], 
+        inputBuffers[0] + m_blockSize, 
         0, 
         [&](double acc, double val){return acc + val*val; });
 
