@@ -32,19 +32,24 @@ YinUtil::~YinUtil()
 void 
 YinUtil::slowDifference(const double *in, double *yinBuffer) 
 {
-    yinBuffer[0] = 0;
-    double delta ;
-    int startPoint = 0;
-    int endPoint = 0;
-    for (int i = 1; i < int(m_yinBufferSize); ++i) {
-        yinBuffer[i] = 0;
-        startPoint = m_yinBufferSize/2 - i/2;
-        endPoint = startPoint + m_yinBufferSize;
-        for (int j = startPoint; j < endPoint; ++j) {
-            delta = in[i+j] - in[j];
-            yinBuffer[i] += delta * delta;
-        }
-    }    
+    auto m_yinBufferSize = this->m_yinBufferSize;
+
+    std::iota(yinBuffer, yinBuffer + m_yinBufferSize, 1);
+    std::transform(std::execution::par, &yinBuffer[1], &yinBuffer[m_yinBufferSize],
+                   &yinBuffer[1],
+                   [m_yinBufferSize, &in, &yinBuffer](double idx)
+                   {
+                       size_t i = (size_t)idx;
+                       int startPoint = m_yinBufferSize / 2 - i / 2;
+                       int endPoint = startPoint + m_yinBufferSize;
+                       double sum = 0;
+                       for (int j = startPoint; j < endPoint; ++j)
+                       {
+                           double delta = in[i + j] - in[j];
+                           sum += delta * delta;
+                       }
+                       return sum;
+                   });
 }
 
 void 
