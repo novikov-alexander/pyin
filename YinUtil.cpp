@@ -29,23 +29,25 @@ YinUtil::~YinUtil()
 {
 }
 
-void 
-YinUtil::slowDifference(const double *in, double *yinBuffer) 
-{
-    yinBuffer[0] = 0;
-    double delta ;
-    int startPoint = 0;
-    int endPoint = 0;
-    for (int i = 1; i < int(m_yinBufferSize); ++i) {
-        yinBuffer[i] = 0;
-        startPoint = m_yinBufferSize/2 - i/2;
-        endPoint = startPoint + m_yinBufferSize;
-        for (int j = startPoint; j < endPoint; ++j) {
-            delta = in[i+j] - in[j];
-            yinBuffer[i] += delta * delta;
-        }
-    }    
+void
+YinUtil::slowDifference(const double *in, double *yinBuffer) {
+    auto m_yinBufferSize = this->m_yinBufferSize;
+    
+    auto indices = std::views::iota(1uz, m_yinBufferSize) 
+                 | std::views::transform([=](size_t i) {
+                       int startPoint = m_yinBufferSize / 2 - i / 2;
+                       int endPoint = startPoint + m_yinBufferSize;
+                       double sum = 0;
+                       for (int j = startPoint; j < endPoint; ++j) {
+                           double delta = in[i + j] - in[j];
+                           sum += delta * delta;
+                       }
+                       return sum;
+                   });
+    
+    std::ranges::copy(std::execution::par, indices, &yinBuffer[1]);
 }
+
 
 void 
 YinUtil::fastDifference(const double *in, double *yinBuffer) 
