@@ -13,6 +13,7 @@
 
 #include "YinUtil.h"
 
+#include <execution>
 #include <vector>
 
 #include <cstdio>
