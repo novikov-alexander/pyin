@@ -34,21 +34,20 @@ YinUtil::slowDifference(const double *in, double *yinBuffer)
 {
     auto m_yinBufferSize = this->m_yinBufferSize;
 
-    std::iota(yinBuffer, yinBuffer + m_yinBufferSize, 1);
     std::transform(std::execution::par, &yinBuffer[1], &yinBuffer[m_yinBufferSize],
                    &yinBuffer[1],
-                   [m_yinBufferSize, &in, &yinBuffer](double idx)
+                   [m_yinBufferSize, &in, &yinBuffer](double &val)
                    {
-                       size_t i = (size_t)idx;
-                       int startPoint = m_yinBufferSize / 2 - i / 2;
-                       int endPoint = startPoint + m_yinBufferSize;
-                       double sum = 0;
-                       for (int j = startPoint; j < endPoint; ++j)
-                       {
-                           double delta = in[i + j] - in[j];
-                           sum += delta * delta;
-                       }
-                       return sum;
+                        size_t i = &val - &yinBuffer[0];
+                        int startPoint = m_yinBufferSize / 2 - i / 2;
+                        int endPoint = startPoint + m_yinBufferSize;
+                        double sum = 0;
+                        for (int j = startPoint; j < endPoint; ++j)
+                        {
+                            double delta = in[i + j] - in[j];
+                            sum += delta * delta;
+                        }
+                        return sum;
                    });
 }
 
