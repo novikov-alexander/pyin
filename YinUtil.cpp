@@ -13,6 +13,8 @@
 
 #include "YinUtil.h"
 
+#include <execution>
+#include <numeric>
 #include <vector>
 
 #include <cstdio>
@@ -31,23 +33,23 @@ YinUtil::~YinUtil()
 
 void
 YinUtil::slowDifference(const double *in, double *yinBuffer) {
-    auto m_yinBufferSize = this->m_yinBufferSize;
+    yinBuffer[0] = 0;
     
-    auto indices = std::views::iota(1uz, m_yinBufferSize) 
-                 | std::views::transform([=](size_t i) {
-                       int startPoint = m_yinBufferSize / 2 - i / 2;
-                       int endPoint = startPoint + m_yinBufferSize;
-                       double sum = 0;
-                       for (int j = startPoint; j < endPoint; ++j) {
-                           double delta = in[i + j] - in[j];
-                           sum += delta * delta;
-                       }
-                       return sum;
-                   });
+    std::vector<size_t> indices(m_yinBufferSize - 1);
+    std::iota(indices.begin(), indices.end(), 1);
     
-    std::ranges::copy(std::execution::par, indices, &yinBuffer[1]);
+    std::transform(std::execution::par, indices.begin(), indices.end(), 
+                   yinBuffer + 1, [=](size_t i) {
+        int startPoint = m_yinBufferSize / 2 - i / 2;
+        int endPoint = startPoint + m_yinBufferSize;
+        double sum = 0;
+        for (int j = startPoint; j < endPoint; ++j) {
+            double delta = in[i + j] - in[j];
+            sum += delta * delta;
+        }
+        return sum;
+    });
 }
-
 
 void 
 YinUtil::fastDifference(const double *in, double *yinBuffer) 
